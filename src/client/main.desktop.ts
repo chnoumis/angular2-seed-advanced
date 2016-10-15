@@ -2,24 +2,27 @@ process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 console.log(`Electron launching with NODE_ENV: ${process.env.NODE_ENV}`);
 
 // electron
-const app: any = require('app');
-const Menu: any = require('menu');
-const shell: any = require('shell');
-const crashReporter: any = require('crash-reporter');
-const BrowserWindow: any = require('browser-window');
+const electron = require('electron');
+const app = electron.app;
+const Menu: any = electron.Menu;
+const shell: any = electron.shell;
+// const {crashReporter} = require('electron');
+const BrowserWindow = electron.BrowserWindow;
 let mainWindow: any = null;
 let template: any;
 let menu: any;
 
 // app
-import {AppConfigService} from './app/frameworks/app.framework/services/app-config.service';
+import { AppConfig } from './app/frameworks/sample/services/app-config';
 
-crashReporter.start({
-  productName: 'Angular2SeedAdvanced',
-  companyName: 'NathanWalker',
-  submitURL: 'https://github.com/NathanWalker/angular2-seed-advanced',
-  autoSubmit: true
-});
+// Sample
+// You would need a valid `submitURL` to use
+// crashReporter.start({
+//   productName: 'AngularSeedAdvanced',
+//   companyName: 'NathanWalker',
+//   submitURL: 'https://github.com/NathanWalker/angular-seed-advanced',
+//   autoSubmit: true
+// });
 
 if (process.env.NODE_ENV === 'development') {
   require('electron-debug')();
@@ -46,15 +49,15 @@ app.on('ready', () => {
 
   mainWindow.webContents.on('did-navigate-in-page', (e: any, url: string) => {
     console.log(`Page navigated: ${url}`);
-  });  
+  });
 
-  let appTitle: string = `Angular 2 Seed Advanced`;  
+  let appTitle: string = `Angular 2 Seed Advanced`;
 
   let langMenu: any = {
     label: 'Language',
     submenu: []
   };
-  for (var lang of AppConfigService.SUPPORTED_LANGUAGES) {
+  for (var lang of AppConfig.SUPPORTED_LANGUAGES) {
     let code = lang.code;
     let langOption = {
       label: lang.title,
@@ -71,17 +74,17 @@ app.on('ready', () => {
     submenu: [{
       label: 'Learn More',
       click:() => {
-        shell.openExternal('https://github.com/NathanWalker/angular2-seed-advanced');
+        shell.openExternal('https://github.com/NathanWalker/angular-seed-advanced');
       }
     }, {
         label: 'Issues',
         click:() => {
-          shell.openExternal('https://github.com/NathanWalker/angular2-seed-advanced/issues');
+          shell.openExternal('https://github.com/NathanWalker/angular-seed-advanced/issues');
         }
       }, {
         label: `My Amazing Parent: Minko Gechev's Angular 2 Seed`,
         click:() => {
-          shell.openExternal('https://github.com/mgechev/angular2-seed');
+          shell.openExternal('https://github.com/mgechev/angular-seed');
         }
       }, {
         label: 'Angular 2',
@@ -101,10 +104,10 @@ app.on('ready', () => {
       }, {
         label: 'Codeology Visualization',
         click:() => {
-          shell.openExternal('http://codeology.braintreepayments.com/nathanwalker/angular2-seed-advanced');
+          shell.openExternal('http://codeology.braintreepayments.com/nathanwalker/angular-seed-advanced');
         }
       }]
-  };  
+  };
 
   if (process.platform === 'darwin') {
     template = [{

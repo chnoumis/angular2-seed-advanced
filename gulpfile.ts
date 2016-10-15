@@ -1,12 +1,13 @@
 import * as gulp from 'gulp';
+import * as util from 'gulp-util';
 import * as runSequence from 'run-sequence';
 
-import { PROJECT_TASKS_DIR, SEED_TASKS_DIR } from './tools/config';
+import Config from './tools/config';
 import { loadTasks } from './tools/utils';
 
 
-loadTasks(SEED_TASKS_DIR);
-loadTasks(PROJECT_TASKS_DIR);
+loadTasks(Config.SEED_TASKS_DIR);
+loadTasks(Config.PROJECT_TASKS_DIR);
 
 
 // --------------
@@ -46,28 +47,49 @@ gulp.task('build.prod', (done: any) =>
               'css-lint',
               'build.assets.prod',
               'build.html_css',
-              'copy.js.prod',
+              'copy.prod',
               'build.js.prod',
               'build.bundles',
               'build.bundles.app',
+              'minify.bundles',
+              'build.index.prod',
+              done));
+
+// --------------
+// Build prod.
+gulp.task('build.prod.exp', (done: any) =>
+  runSequence('clean.prod',
+              'tslint',
+              'css-lint',
+              'build.assets.prod',
+              'build.html_css',
+              'copy.prod',
+              'compile.ahead.prod',
+              'build.js.prod.exp',
+              'build.bundles',
+              'build.bundles.app.exp',
+              'minify.bundles',
               'build.index.prod',
               done));
 
 // --------------
 // Build test.
 gulp.task('build.test', (done: any) =>
-  runSequence('clean.dev',
+  runSequence('clean.once',
               'tslint',
               'build.assets.dev',
+              'build.html_css',
+              'build.js.dev',
               'build.js.test',
               'build.index.dev',
               done));
 
 // --------------
 // Build test watch.
-gulp.task('build.test.watch', (done: any) =>
+gulp.task('test.watch', (done: any) =>
   runSequence('build.test',
               'watch.test',
+              'karma.watch',
               done));
 
 // --------------
@@ -79,10 +101,10 @@ gulp.task('build.tools', (done: any) =>
 
 // --------------
 // Docs
-// gulp.task('docs', (done: any) =>
-//   runSequence('build.docs',
-//               'serve.docs',
-//               done));
+gulp.task('docs', (done: any) =>
+  runSequence('build.docs',
+              'serve.docs',
+              done));
 
 // --------------
 // Serve dev
@@ -113,10 +135,9 @@ gulp.task('serve.prod', (done: any) =>
 // Test.
 gulp.task('test', (done: any) =>
   runSequence('build.test',
-              'karma.start',
+              'karma.run',
               done));
 
-// --------------
 // Desktop (Electron)
 
 // Development
@@ -126,7 +147,15 @@ gulp.task('desktop', (done: any) =>
               'desktop.build',
               done));
 
-// Package
+// Release and Package
+
+// TODO: integrate prod build into electron package
+// gulp.task('desktop.prod', (done: any) =>
+//   runSequence('build.prod',
+//               'desktop.libs',
+//               'desktop.build',
+//               done));
+
 gulp.task('desktop.mac', (done: any) =>
   runSequence('desktop',
               'desktop.package.mac',
@@ -141,3 +170,31 @@ gulp.task('desktop.linux', (done: any) =>
   runSequence('desktop',
               'desktop.package.linux',
               done));
+
+// --------------
+// Clean directories after i18n
+// TODO: find a better way to do it
+gulp.task('clean.i18n', (done: any) =>
+  runSequence('clear.files',
+              done));
+
+// --------------
+// Clean directories after i18n
+// TODO: find a better way to do it
+gulp.task('clean.i18n', (done: any) =>
+  runSequence('clear.files',
+              done));
+
+// --------------
+// Clean dev/coverage that will only run once
+// this prevents karma watchers from being broken when directories are deleted
+let firstRun = true;
+gulp.task('clean.once', (done: any) => {
+  if (firstRun) {
+    firstRun = false;
+    runSequence('clean.dev', 'clean.coverage', done);
+  } else {
+    util.log('Skipping clean on rebuild');
+    done();
+  }
+});
