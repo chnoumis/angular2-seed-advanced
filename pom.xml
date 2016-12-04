@@ -5,7 +5,7 @@
 	<groupId>com.chnoumis</groupId>
 	<artifactId>angular-seed-advanced</artifactId>
 	<name>angular-seed-advanced</name>
-	<version>2.2.4-SNAPSHOT</version>
+	<version>2.2.3</version>
 	<packaging>pom</packaging>
 	<build>
 		<plugins>
