@@ -7,9 +7,13 @@
     "ChromeDebugger-UserData/**/*": true
   },
   "search.exclude": {
+    "**/coverage_js": true,
+    "**/coverage": true,
+    "**/dist": true,
     "**/nativescript/platforms": true,
     "src/client/**/*.js": true,
     "nativescript/app/**/*.js": true,
     "ChromeDebugger-UserData/**/*": true
-  }
+  },
+  "typescript.tsdk": "node_modules/typescript/lib"
 }

@@ -1,5 +1,6 @@
 import { argv } from 'yargs';
 import { SeedConfig } from './seed.config';
+import { ExtendPackages } from './seed.config.interfaces';
 
 export class SeedAdvancedConfig extends SeedConfig {
 
@@ -18,82 +19,102 @@ export class SeedAdvancedConfig extends SeedConfig {
       }
     }
     let bootstrap = 'main.web';
-    if (this.ENABLE_HOT_LOADING) {
-      bootstrap   = 'hot_loader_main';
-    } else if (this.TARGET_MOBILE_HYBRID) {
-      bootstrap   = 'main.mobile.hybrid'; // Cordova
+    if (this.TARGET_MOBILE_HYBRID) {
+      // Perhaps Ionic or Cordova
+      // This is not implemented in the seed but here to show you way forward if you wanted to add
+      bootstrap   = 'main.mobile.hybrid';
     }
 
     // Override seed defaults
     this.BOOTSTRAP_DIR = argv['app'] ? (argv['app'] + '/') : '';
-    this.BOOTSTRAP_MODULE = `${this.BOOTSTRAP_DIR}` + (this.ENABLE_HOT_LOADING ? 'hot_loader_main' : bootstrap);
+    this.BOOTSTRAP_MODULE = `${this.BOOTSTRAP_DIR}${bootstrap}`;
     this.NG_FACTORY_FILE = `${bootstrap}.prod`;
     this.BOOTSTRAP_PROD_MODULE = `${this.BOOTSTRAP_DIR}${bootstrap}`;
     this.BOOTSTRAP_FACTORY_PROD_MODULE = `${this.BOOTSTRAP_DIR}${bootstrap}.prod`;
 
-    this.APP_TITLE = 'Angular 2 Seed Advanced';
+    this.APP_TITLE = 'Angular Seed Advanced';
     this.APP_BASE = ''; // paths must remain relative
 
-    /** Development **/
-
-    this.NPM_DEPENDENCIES = [
-      ...this.NPM_DEPENDENCIES,
-      { src: 'ts-helpers/index.js', inject: 'libs' }
-      // { src: 'ng2-translate/bundles/ng2-translate.js', inject: 'libs' }
+    // Advanced seed packages
+    let additionalPackages: ExtendPackages[] = [
+      {
+        name: 'lodash',
+        path: `${this.APP_BASE}node_modules/lodash/lodash.js`,
+        packageMeta: {
+          main: 'index.js',
+          defaultExtension: 'js'
+        }
+      },
+      {
+        name: '@ngrx/core',
+        packageMeta: {
+          main: 'bundles/core.umd.js',
+          defaultExtension: 'js'
+        }
+      },
+      {
+        name: '@ngrx/store',
+        packageMeta: {
+          main: 'bundles/store.umd.js',
+          defaultExtension: 'js'
+        }
+      },
+      {
+        name: '@ngrx/effects',
+        packageMeta: {
+          main: 'bundles/effects.umd.js',
+          defaultExtension: 'js'
+        }
+      },
+      {
+        name: '@ngrx/effects/testing',
+        path: `${this.APP_BASE}node_modules/@ngrx/effects/testing/index.js`
+      },
+      {
+        name: '@ngrx/store-devtools',
+        packageMeta: {
+          main: 'bundles/store-devtools.umd.js',
+          defaultExtension: 'js'
+        }
+      },
+      {
+        name: 'ng2-translate',
+        packageMeta: {
+          main: 'bundles/index.js',
+          defaultExtension: 'js'
+        }
+      },
+      {
+        name: 'angulartics2',
+        packageMeta: {
+          main: 'dist/index.js',
+          defaultExtension: 'js'
+        }
+      },
+      {
+        name: 'angulartics2/dist/providers',
+        packageMeta: {
+          main: 'index.js',
+          defaultExtension: 'js'
+        }
+      },
+      {
+        name: 'ngrx-store-freeze',
+        path: `${this.APP_BASE}node_modules/ngrx-store-freeze/dist/index.js`
+      },
+      {
+        name: 'deep-freeze',
+        path: `${this.APP_BASE}node_modules/deep-freeze/index.js`
+      }
     ];
 
-    // Fix up package configuration for libs and @ngrx
-    this.SYSTEM_CONFIG['packageConfigPaths'] = [
-      `${this.APP_BASE}node_modules/*/package.json`,
-      `${this.APP_BASE}node_modules/@ngrx/*/package.json`
-    ];
+    this.addPackagesBundles(additionalPackages);
 
-    if (!this.SYSTEM_CONFIG['packages']) this.SYSTEM_CONFIG['packages'] = {};
-    this.SYSTEM_CONFIG['packages']['@ngrx/core'] = {
-      main: 'bundles/core.umd.js',
-      defaultExtension: 'js'
-    };
-    this.SYSTEM_CONFIG['packages']['@ngrx/store'] = {
-      main: 'bundles/store.umd.js',
-      defaultExtension: 'js'
-    };
-    this.SYSTEM_CONFIG['packages']['@ngrx/effects'] = {
-      main: 'bundles/effects.umd.js',
-      defaultExtension: 'js'
-    };
-
-    // Fix up paths for libs
+    // Fix up path to bootstrap module
     this.SYSTEM_CONFIG.paths[this.BOOTSTRAP_MODULE] = `${this.APP_BASE}${this.BOOTSTRAP_MODULE}`;
-    this.SYSTEM_CONFIG.paths['angulartics2'] = `${this.APP_BASE}node_modules/angulartics2/index`;
-    this.SYSTEM_CONFIG.paths['angulartics2/*'] = `${this.APP_BASE}node_modules/angulartics2/*`;
-    // ng2-translate has been causing headaches - may need to remove
-    // for now, using NPM_DEPENDENCIES above to include the bundle
-    // this.SYSTEM_CONFIG.paths['ng2-translate/*'] = `${this.APP_BASE}node_modules/ng2-translate/ng2-translate`;
-    this.SYSTEM_CONFIG.paths['lodash'] = `${this.APP_BASE}node_modules/lodash/index`;
-
-    // testing support for @ngrx/effects
-    this.SYSTEM_CONFIG.paths['@ngrx/effects/testing'] = `node_modules/@ngrx/effects/testing/index`;
 
     /** Production **/
 
     delete this.SYSTEM_BUILDER_CONFIG['packageConfigPaths']; // not all libs are distributed the same
-    this.SYSTEM_BUILDER_CONFIG['packages']['@ngrx/core'] = {
-      main: 'index.js',
-      defaultExtension: 'js'
-    };
-    this.SYSTEM_BUILDER_CONFIG['packages']['@ngrx/store'] = {
-      main: 'index.js',
-      defaultExtension: 'js'
-    };
-    this.SYSTEM_BUILDER_CONFIG['packages']['@ngrx/effects'] = {
-      main: 'index.js',
-      defaultExtension: 'js'
-    };
-    this.SYSTEM_BUILDER_CONFIG.paths['angulartics2'] = `node_modules/angulartics2/index.js`;
-    this.SYSTEM_BUILDER_CONFIG.paths['lodash'] = `node_modules/lodash/index.js`;
-    // this.SYSTEM_BUILDER_CONFIG.paths['ng2-translate/*'] = `node_modules/ng2-translate/ng2-translate.js`;
-    this.SYSTEM_BUILDER_CONFIG.paths['@ngrx/core'] = `node_modules/@ngrx/core/index.js`;
-    this.SYSTEM_BUILDER_CONFIG.paths['@ngrx/store'] = `node_modules/@ngrx/store/index.js`;
-    this.SYSTEM_BUILDER_CONFIG.paths['@ngrx/effects'] = `node_modules/@ngrx/effects/index.js`;
   }
 }
